@@ -4,7 +4,10 @@ import sys
 import logging
 import json
 
+from datetime import datetime
+
 import blueox.client
+from blueox.utils import get_deep
 
 log = logging.getLogger('blueox.view')
 
@@ -29,12 +32,33 @@ def print_pretty_header(entity):
             duration_str = "%d ms" % round(duration * 1000)
         else:
             duration_str = "%.1f s" % duration
+        timestamp_str = datetime.fromtimestamp(
+            entity['end']).strftime('%Y-%m-%d %H:%M:%S')
 
-        print "=== %s (%s@%s:%s)  (%s)" % (entity['type'], entity['id'][:12],
-                                           entity['host'], entity['pid'],
-                                           duration_str)
+        print "== %s | %s | %s@%s:%s (%s)" % (
+            timestamp_str,
+            entity['type'],
+            entity['id'][:12],
+            entity['host'],
+            entity['pid'],
+            duration_str)
+
     except KeyError:
         print "=== %s (%s)" % (entity['type'], entity['id'])
+
+
+class FilteredStream(object):
+    def __init__(self, key_path, val, stream):
+        self.stream = stream
+        self.key_path = key_path
+        self.val = val
+
+    def __iter__(self):
+        for event in self.stream:
+            if get_deep(event, self.key_path) == self.val:
+                yield event
+
+        raise StopIteration
 
 
 def main():
@@ -50,7 +74,10 @@ def main():
         dest='type_name',
         action='store',
         default=None,
-        help="What event types to display. Can end with '*' for prefix matches.")
+        help=(
+            "What event types to display. Can end with '*'"
+            " for prefix matches."))
+
     parser.add_argument('--host', '-H',
                         dest='host',
                         action='store',
@@ -67,6 +94,11 @@ def main():
                         dest='group',
                         action='store_true',
                         default=False)
+    parser.add_argument('--filter',
+                        dest='filter',
+                        action='store',
+                        default=None,
+                        help='ex. --filter=body.customer.name:"Sara"')
 
     options = parser.parse_args()
 
@@ -90,6 +122,11 @@ def main():
 
     if options.group:
         out_stream = blueox.client.Grouper(out_stream)
+
+    if options.filter:
+        key_path, val = options.filter.split(':')
+        val = json.loads(val)
+        out_stream = FilteredStream(key_path, val, out_stream)
 
     for line in out_stream:
         if options.pretty:
