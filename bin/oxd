@@ -180,6 +180,15 @@ def main():
                         dest='forward',
                         action='store',
                         default=None)
+    parser.add_argument('--stream-range',
+                        dest='stream_range',
+                        metavar=('min_port', 'max_port'),
+                        action='store',
+                        type=int,
+                        nargs=2,
+                        help="Range to randomly assign streaming port,\
+                        by default from 35000 to 36000",
+                        default=[35000,36000])
 
     parser.add_argument('--log-path', '-l',
                         dest='log_path',
@@ -204,6 +213,14 @@ def main():
         continue_running[0] = False
 
     signal.signal(signal.SIGTERM, handle_sigterm)
+
+    if options.stream_range:
+        if (options.stream_range[0] >= options.stream_range[1] or
+            options.stream_range[0] < 35000 or
+            options.stream_range[1] > 36000):
+            parser.error("Invalid value for stream_range, " \
+            "min_port should be greater or equal 35000 " \
+            "and max_port should be less or equal 36000")
 
     if options.log_path:
         try:
@@ -233,8 +250,8 @@ def main():
     streamer_sock = zmq_context.socket(zmq.PUB)
     host, _ = control_host.split(':')
     streamer_sock_port = streamer_sock.bind_to_random_port("tcp://%s" % host,
-                                                           min_port=35000,
-                                                           max_port=36000)
+                                                           min_port=options.stream_range[0],
+                                                           max_port=options.stream_range[1])
     log.info("Streaming port bound to %s:%d", host, streamer_sock_port)
 
     forward_sock = None
