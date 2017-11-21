@@ -1,3 +1,6 @@
+blueox (0.11.5)
+  * update oxstash with more recent return status from Elasticsearch
+
 blueox (0.11.4)
 
   * add command line option to set range for streaming ports (bks7)
