@@ -41,7 +41,7 @@ def build_doc(options, evt):
     # This appears to be the default timestamp key logstash/kibana looks for.
     evt['@timestamp'] = timestamp.isoformat() + 'Z'
 
-    action = {'_index': index, '_type': evt_type, '_source': evt,}
+    action = {'_index': index, '_type': evt_type, '_source': evt}
 
     return elasticsearch.helpers.expand_action(action)
 
@@ -129,7 +129,7 @@ def main():
 
     for result in bulk_streamer:
         batch_ok, item = result
-        if item['create'].get('ok') is not True:
+        if not item['index']['created']:
             print item
 
 
