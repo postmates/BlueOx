@@ -113,7 +113,7 @@ def subscribe_stream(control_host, subscribe):
                 if not prefix and subscription and channel != subscription:
                     continue
 
-                yield msgpack.unpackb(data)
+                yield msgpack.unpackb(data,encoding='utf8')
             else:
                 break
 

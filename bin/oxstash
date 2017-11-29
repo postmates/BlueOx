@@ -121,17 +121,22 @@ def main():
         out_stream = blueox.client.stdin_stream()
 
     action_callback = functools.partial(build_doc, options)
-    bulk_streamer = elasticsearch.helpers.streaming_bulk(
-        es, out_stream,
-        request_timeout=options.request_timeout,
-        chunk_size=options.chunk_size,
-        expand_action_callback=action_callback)
 
-    for result in bulk_streamer:
-        batch_ok, item = result
-        if not item['index']['created']:
-            print item
+    while True:
+        try:
+            bulk_streamer = elasticsearch.helpers.streaming_bulk(
+                es, out_stream,
+                request_timeout=options.request_timeout,
+                chunk_size=options.chunk_size,
+                expand_action_callback=action_callback)
 
+            for result in bulk_streamer:
+                batch_ok, item = result
+                if not item['index']['created']:
+                    print item
+        except Exception as e:
+            print e
+            pass
 
 if __name__ == '__main__':
     try:
