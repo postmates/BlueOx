@@ -34,3 +34,6 @@ devclean:
 
 clean:
 	@rm -rf build dist
+
+sdist:
+	python setup.py sdist --formats zip
