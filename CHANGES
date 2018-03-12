@@ -1,3 +1,6 @@
+blueox (0.11.6.2)
+  * Fix DeprecationWarning: integer argument expected
+
 blueox (0.11.6.1)
   * make msgunpack utf8-friendly and oxstash more resilient with ES bulk indexing failures
 
