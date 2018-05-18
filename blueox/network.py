@@ -9,13 +9,12 @@ This module provides our interface into ZeroMQ
 :license: ISC, see LICENSE for more details.
 
 """
-import logging
-import threading
-import struct
 import atexit
-
-import zmq
+import logging
 import msgpack
+import struct
+import threading
+import zmq
 
 from . import utils
 
@@ -80,6 +79,11 @@ def _serialize_context(context):
         if len(context_dict.get(key, "")) > 64:
             raise ValueError("Value too long: %r" % key)
 
+    context_dict = {
+        k: v.encode('utf-8') if isinstance(v, unicode)
+        else v for k, v in context_dict.items()
+    }
+
     meta_data = struct.pack(META_STRUCT_FMT, META_STRUCT_VERSION,
                             context_dict['end'], context_dict['host'],
                             context_dict['type'])
@@ -117,7 +121,7 @@ def send(context):
             log.debug("Sending msg")
             threadLocal.zmq_socket.send_multipart(
                 (meta_data, context_data), zmq.NOBLOCK)
-        except zmq.ZMQError, e:
+        except zmq.ZMQError:
             log.exception("Failed sending blueox event, buffer full?")
     else:
         log.info("Skipping sending event %s", context.name)

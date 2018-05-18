@@ -1,3 +1,6 @@
+blueox (0.11.6.3)
+  * Fix handling of unicode strings
+
 blueox (0.11.6.2)
   * Fix DeprecationWarning: integer argument expected
 
