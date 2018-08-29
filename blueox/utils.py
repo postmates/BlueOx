@@ -82,5 +82,4 @@ def msgpack_encode_default(obj):
         return time.mktime(obj.utctimetuple())
     if isinstance(obj, datetime.date):
         return obj.strftime("%Y-%m-%d")
-
-    raise TypeError("Unknown type: %r" % (obj,))
+    return None
