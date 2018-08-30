@@ -30,11 +30,9 @@ from . import context as _context_mod
 from .errors import Error
 from .logger import LogHandler
 from .timer import timeit
-from .recorders import kafka_recorder
+from .recorders import kafka
 
 log = logging.getLogger(__name__)
-
-OVERRIDE_KAFKA_RECORDER = os.getenv('BLUEOX_OVERRIDE_KAFKA_RECORDER', 0)
 
 
 def configure(host, port, recorder=None):
@@ -46,9 +44,13 @@ def configure(host, port, recorder=None):
     Currently we support logging through the network (and the configured host and port) to a blueoxd instances, or
     to the specified recorder function
     """
-    if int(OVERRIDE_KAFKA_RECORDER) == 1:
+    override_kafka_recorder = os.getenv('BLUEOX_OVERRIDE_KAFKA_RECORDER', 0)
+
+    if int(override_kafka_recorder) == 1:
         log.info("Kafka override set, using kafka recorder")
-        _context_mod._recorder_function = kafka_recorder.send
+        host = ports.default_kafka_host()
+        kafka.init(host)
+        _context_mod._recorder_function = kafka.send
     elif recorder:
         _context_mod._recorder_function = recorder
     elif host and port:
