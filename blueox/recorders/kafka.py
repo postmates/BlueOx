@@ -9,14 +9,16 @@ This module provides the interface into Kafka
 :license: ISC, see LICENSE for more details.
 
 """
+from __future__ import absolute_import
+
 import atexit
 import logging
 import msgpack
+import threading
 
 from kafka import KafkaProducer
 
-from .. import ports
-from .. import utils
+from blueox import utils
 
 log = logging.getLogger(__name__)
 
@@ -24,21 +26,22 @@ log = logging.getLogger(__name__)
 # being told to exit.
 LINGER_SHUTDOWN_MSECS = 2000
 
-# Producer can be shared between threads
-_kafka_producer = None
+
+threadLocal = threading.local()
+
+# Context can be shared between threads
+_kafka_hosts = None
 
 
-def init(host=None):
-    """Initialize the global kafka producer
+def init(host):
+    global _kafka_hosts
 
-    Supports a host arg with an overriding kafka host string
-    in the format 'hostname:port'
-    """
-    global _kafka_producer
+    _kafka_hosts = host
 
-    host = ports.default_kafka_host(host)
 
-    _kafka_producer = KafkaProducer(bootstrap_servers=host)
+def _thread_connect():
+    if _kafka_hosts and not getattr(threadLocal, 'kp', None):
+        threadLocal.kp = KafkaProducer(bootstrap_servers=_kafka_hosts)
 
 
 def _serialize_context(context):
@@ -71,7 +74,7 @@ def _serialize_context(context):
 
 
 def send(context):
-    global _kafka_producer
+    _thread_connect()
 
     try:
         context_data = _serialize_context(context)
@@ -79,10 +82,10 @@ def send(context):
         log.exception("Failed to serialize context")
         return
 
-    if _kafka_producer:
+    if _kafka_hosts and threadLocal.kp is not None:
         try:
             log.debug("Sending msg")
-            _kafka_producer.send('events', context_data)
+            threadLocal.kp.send('events', context_data)
         except Exception:
             log.exception("Failed during publish to kafka.")
     else:
@@ -90,12 +93,10 @@ def send(context):
 
 
 def close():
-    global _kafka_producer
-
-    if _kafka_producer:
-        _kafka_producer.flush()
-        _kafka_producer.close(timeout=LINGER_SHUTDOWN_MSECS)
-    _kafka_producer = None
+    if getattr(threadLocal, 'kp', None):
+        threadLocal.kp.flush()
+        threadLocal.kp.close(timeout=LINGER_SHUTDOWN_MSECS)
+        threadLocal.kp = None
 
 
 atexit.register(close)

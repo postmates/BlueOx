@@ -1,5 +1,8 @@
 import os
-from testify import *
+from testify import (
+    TestCase,
+    assert_equal,
+    teardown)
 
 from blueox import ports
 
@@ -71,3 +74,26 @@ class DefaultCollectHost(TestCase):
         os.environ['BLUEOX_HOST'] = 'master:123'
         host = ports.default_collect_host()
         assert_equal(host, "master:123")
+
+
+class DefaultKafkaHost(TestCase):
+    @teardown
+    def clear_env(self):
+        try:
+            del os.environ['BLUEOX_KAFKA_HOST']
+        except KeyError:
+            pass
+
+    def test_emtpy(self):
+        host = ports.default_kafka_host()
+        assert_equal(host, '127.0.0.1:9092')
+
+    def test_env(self):
+        os.environ['BLUEOX_KAFKA_HOST'] = 'local.svc.team-me.aws.jk8s'
+        host = ports.default_kafka_host()
+        assert_equal(host, 'local.svc.team-me.aws.jk8s:9092')
+
+    def test_env_port(self):
+        os.environ['BLUEOX_KAFKA_HOST'] = 'local.svc.team-me.aws.jk8s:9002'
+        host = ports.default_kafka_host()
+        assert_equal(host, 'local.svc.team-me.aws.jk8s:9002')
