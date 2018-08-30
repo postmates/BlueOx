@@ -30,20 +30,26 @@ from . import context as _context_mod
 from .errors import Error
 from .logger import LogHandler
 from .timer import timeit
+from .recorders import kafka_recorder
 
 log = logging.getLogger(__name__)
+
+OVERRIDE_KAFKA_RECORDER = os.getenv('BLUEOX_OVERRIDE_KAFKA_RECORDER', 0)
 
 
 def configure(host, port, recorder=None):
     """Initialize blueox
 
-    This instructs the blueox system where to send it's logging data. If blueox is not configured, log data will
+    This instructs the blueox system where to send its logging data. If blueox is not configured, log data will
     be silently dropped.
 
     Currently we support logging through the network (and the configured host and port) to a blueoxd instances, or
     to the specified recorder function
     """
-    if recorder:
+    if int(OVERRIDE_KAFKA_RECORDER) == 1:
+        log.info("Kafka override set, using kafka recorder")
+        _context_mod._recorder_function = kafka_recorder.send
+    elif recorder:
         _context_mod._recorder_function = recorder
     elif host and port:
         network.init(host, port)

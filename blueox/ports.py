@@ -41,3 +41,13 @@ def default_control_host(host=None):
 def default_collect_host(host=None):
     default_host = os.environ.get(ENV_VAR_COLLECT_HOST, DEFAULT_HOST)
     return _default_host(host, default_host, DEFAULT_COLLECT_PORT)
+
+
+# For consistency, we'll abstract kafka connections in the same way
+ENV_VAR_KAFKA_HOST = 'BLUEOX_KAFKA_HOST'
+DEFAULT_KAFKA_PORT = 9002
+
+
+def default_kafka_host(host=None):
+    default_host = os.environ.get(ENV_VAR_KAFKA_HOST, DEFAULT_HOST)
+    return _default_host(host, default_host, DEFAULT_KAFKA_PORT)
