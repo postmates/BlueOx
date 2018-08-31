@@ -21,7 +21,6 @@ import logging
 import os
 
 from . import utils
-from . import network
 from . import ports
 from .context import (
     Context, set, append, add, context_wrap, current_context, find_context,
@@ -30,44 +29,53 @@ from . import context as _context_mod
 from .errors import Error
 from .logger import LogHandler
 from .timer import timeit
-from .recorders import kafka
+from .recorders import kafka, zmq
 
 log = logging.getLogger(__name__)
+
+RECORDER_ZMQ = 'zmq'
+RECORDER_KAFKA = 'kafka'
+RECORDERS = {
+    RECORDER_ZMQ: zmq,
+    RECORDER_KAFKA: kafka,
+}
+DEFAULT_RECORDER = RECORDER_ZMQ
 
 
 def configure(host, port, recorder=None):
     """Initialize blueox
 
-    This instructs the blueox system where to send its logging data. If blueox is not configured, log data will
-    be silently dropped.
+    This instructs the blueox system where to send its logging data.
+    If blueox is not configured, log data will be silently dropped.
 
-    Currently we support logging through the network (and the configured host and port) to a blueoxd instances, or
-    to the specified recorder function
+    Currently we support logging through the network (and the configured host
+    and port) to a blueoxd instances, or to the specified recorder function.
     """
-    override_kafka_recorder = os.getenv('BLUEOX_OVERRIDE_KAFKA_RECORDER', 0)
-
-    if int(override_kafka_recorder) == 1:
-        log.info("Kafka override set, using kafka recorder")
-        host = ports.default_kafka_host()
-        kafka.init(host)
-        _context_mod._recorder_function = kafka.send
-    elif recorder:
+    if callable(recorder):
         _context_mod._recorder_function = recorder
-    elif host and port:
-        network.init(host, port)
-        _context_mod._recorder_function = network.send
+
     else:
-        log.info("Empty blueox configuration")
-        _context_mod._recorder_function = None
+        _rec = RECORDERS.get(recorder, None)
+
+        if _rec is not None:
+            _rec.init(host, port)
+            _context_mod._recorder_function = _rec.send
+        else:
+            log.info("Empty blueox configuration")
+            _context_mod._recorder_function = None
 
 
-def default_configure(host=None):
+def default_configure(host=None, recorder=DEFAULT_RECORDER):
     """Configure BlueOx based on defaults
 
     Accepts a connection string override in the form `localhost:3514`. Respects
     environment variable BLUEOX_HOST
     """
-    host = ports.default_collect_host(host)
+    _rec = RECORDERS.get(recorder, None)
+    if _rec is None:
+        _rec = RECORDERS.get(DEFAULT_RECORDER)
+
+    host = _rec.default_host(host)
     hostname, port = host.split(':')
 
     try:
@@ -75,8 +83,9 @@ def default_configure(host=None):
     except ValueError:
         raise Error("Invalid value for port")
 
-    configure(hostname, int_port)
+    configure(hostname, int_port, recorder=recorder)
 
 
 def shutdown():
-    network.close()
+    zmq.close()
+    kafka.close()

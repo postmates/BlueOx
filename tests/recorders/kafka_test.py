@@ -10,11 +10,11 @@ from testify import (
     teardown,
     assert_equal)
 
-from blueox import default_configure
+from blueox import default_configure, RECORDER_KAFKA
 from blueox import utils
-from blueox import network
 from blueox import context
 from blueox.recorders import kafka
+from blueox.recorders import zmq
 
 
 class MockKafkaProducer(object):
@@ -47,11 +47,10 @@ class KafkaOverrideTestCase(TestCase):
 
     def test_configure_no_override(self):
         default_configure()
-        assert_equal(context._recorder_function, network.send)
+        assert_equal(context._recorder_function, zmq.send)
 
     def test_configure_override(self):
-        os.environ['BLUEOX_OVERRIDE_KAFKA_RECORDER'] = '1'
-        default_configure()
+        default_configure(recorder=RECORDER_KAFKA)
         assert_equal(context._recorder_function, kafka.send)
 
 
@@ -63,7 +62,7 @@ class KafkaSendTestCase(TestCase):
     @setup
     def init_kafka(self):
         self.port = random.randint(30000, 40000)
-        kafka.init('127.0.0.1:{}'.format(self.port))
+        kafka.init('127.0.0.1', self.port)
 
     @setup
     def configure_kafka(self):
@@ -99,14 +98,16 @@ class SerializeContextTestCase(TestCase):
         with self.context:
             self.context.set('decimal_value', decimal.Decimal("6.66"))
             self.context.set('date_value', datetime.date(2013, 12, 10))
-            self.context.set('datetime_value', datetime.datetime(2013, 12, 10, 12, 12, 12))
+            self.context.set(
+                'datetime_value', datetime.datetime(2013, 12, 10, 12, 12, 12))
 
         context_data = kafka._serialize_context(self.context)
         data = msgpack.unpackb(context_data)
         assert_equal(data['body']['decimal_value'], "6.66")
         assert_equal(data['body']['date_value'], "2013-12-10")
         assert_equal(
-            datetime.datetime.fromtimestamp(float(data['body']['datetime_value'])),
+            datetime.datetime.fromtimestamp(
+                float(data['body']['datetime_value'])),
             datetime.datetime(2013, 12, 10, 12, 12, 12))
 
     def test_exception(self):
@@ -116,5 +117,6 @@ class SerializeContextTestCase(TestCase):
         context_data = kafka._serialize_context(self.context)
         data = msgpack.unpackb(context_data)
 
-        # The serialization should fail, but that just means we don't have any data.
+        # The serialization should fail, but that just
+        # means we don't have any data.
         assert_equal(data['body'], None)

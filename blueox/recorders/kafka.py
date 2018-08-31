@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-blueox.kafka
+blueox.recorders.kafka
 ~~~~~~~~
 
 This module provides the interface into Kafka
@@ -18,6 +18,7 @@ import threading
 
 from kafka import KafkaProducer
 
+from blueox import ports
 from blueox import utils
 
 log = logging.getLogger(__name__)
@@ -27,16 +28,22 @@ log = logging.getLogger(__name__)
 LINGER_SHUTDOWN_MSECS = 2000
 
 
+def default_host(host=None):
+    """Build a default host string for the kafka producer
+    """
+    return ports.default_kafka_host(host)
+
+
 threadLocal = threading.local()
 
 # Context can be shared between threads
 _kafka_hosts = None
 
 
-def init(host):
+def init(host, port):
     global _kafka_hosts
 
-    _kafka_hosts = host
+    _kafka_hosts = '{}:{}'.format(host, port)
 
 
 def _thread_connect():
