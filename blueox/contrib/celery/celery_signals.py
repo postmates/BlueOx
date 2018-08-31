@@ -1,8 +1,7 @@
 """Hooks for gathering celery task data into blueox.
 
-Importing this module will register signal handlers into Celery worker's runtime.
-
-We also will track creation of tasks on the client side.
+Importing this module will register signal handlers into Celery
+worker's runtime. We also will track creation of tasks on the client side.
 """
 import traceback
 
@@ -33,9 +32,9 @@ else:
     @signals.task_sent.connect
     def on_task_sent(**kwargs):
         with blueox.Context('.celery.task_sent'):
-            # Arguments for this signal are different than the worker signals. Sometimes
-            # they are even different than what the documentation says. See also
-            # https://github.com/celery/celery/issues/1606
+            # Arguments for this signal are different than the worker signals.
+            # Sometimes they are even different than what the documentation
+            # says. See also https://github.com/celery/celery/issues/1606
             blueox.set('task_id', kwargs.get('task_id', kwargs.get('id')))
             blueox.set('task', str(kwargs['task']))
             blueox.set('eta', kwargs['eta'])
@@ -43,7 +42,13 @@ else:
 
 @signals.worker_process_init.connect
 def on_worker_process_init(**kwargs):
-    if hasattr(settings, 'BLUEOX_HOST'):
+    if hasattr(settings, 'BLUEOX_KAFKA_HOST'):
+        if settings.BLUEOX_KAFKA_HOST:
+            rec = blueox.KAFKA_RECORDER
+            blueox.default_configure(settings.BLUEOX_KAFKA_HOST, recorder=rec)
+        else:
+            blueox.configure(None, None)
+    elif hasattr(settings, 'BLUEOX_HOST'):
         if settings.BLUEOX_HOST:
             blueox.default_configure(settings.BLUEOX_HOST)
         else:
