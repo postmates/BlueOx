@@ -10,7 +10,7 @@ from testify import (
     teardown,
     assert_equal)
 
-from blueox import default_configure, RECORDER_KAFKA
+from blueox import default_configure, KAFKA_RECORDER
 from blueox import utils
 from blueox import context
 from blueox.recorders import kafka
@@ -50,7 +50,7 @@ class KafkaOverrideTestCase(TestCase):
         assert_equal(context._recorder_function, zmq.send)
 
     def test_configure_override(self):
-        default_configure(recorder=RECORDER_KAFKA)
+        default_configure(recorder=KAFKA_RECORDER)
         assert_equal(context._recorder_function, kafka.send)
 
 

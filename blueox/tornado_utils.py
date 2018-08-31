@@ -5,8 +5,8 @@ blueox.tornado
 
 This module provides hooks for using blueox with the Tornado async web server.
 Making blueox useful inside tornado is a challenge since you'll likely want a
-blueox context per request, but multiple requests can be going on at once inside
-tornado.
+blueox context per request, but multiple requests can be going on at once
+inside tornado.
 
 :copyright: (c) 2012 by Rhett Garber
 :license: ISC, see LICENSE for more details.
@@ -19,8 +19,6 @@ import types
 import sys
 import time
 
-log = logging.getLogger(__name__)
-
 import tornado.web
 import tornado.gen
 import tornado.httpclient
@@ -28,6 +26,8 @@ import tornado.simple_httpclient
 import tornado.stack_context
 
 import blueox
+
+log = logging.getLogger(__name__)
 
 
 def _gen_wrapper(ctx, generator):
@@ -112,7 +112,8 @@ class BlueOxRequestHandlerMixin(object):
 
 class SampleRequestHandler(BlueOxRequestHandlerMixin,
                            tornado.web.RequestHandler):
-    """Sample base request handler that provides basic information about the request.
+    """Sample base request handler that provides basic
+    information about the request.
     """
 
     def prepare(self):
@@ -123,8 +124,8 @@ class SampleRequestHandler(BlueOxRequestHandlerMixin,
 
     def write_error(self, status_code, **kwargs):
         if 'exc_info' in kwargs:
-            blueox.set('exception',
-                       ''.join(traceback.format_exception(*kwargs["exc_info"])))
+            blueox.set('exception', ''.join(
+                traceback.format_exception(*kwargs["exc_info"])))
 
         return super(SampleRequestHandler, self).write_error(status_code,
                                                              **kwargs)
@@ -159,15 +160,16 @@ class AsyncHTTPClient(tornado.simple_httpclient.SimpleAsyncHTTPClient):
         ctx.stop()
 
         # I'd love to use the future to handle the completion step, BUT, we
-        # need this to happen first. If the caller has provided a callback, we don't want them
-        # to get called before we do. Rather than poke into the internal datastructures, we'll just 
-        # handle the callback explicitly
+        # need this to happen first. If the caller has provided a callback, we
+        # don't want them to get called before we do. Rather than poke into the
+        # internal datastructures, we'll just  handle the callback explicitly
 
         def complete_context(response):
             ctx.start()
 
             ctx.set('response.code', response.code)
-            ctx.set('response.size', len(response.body) if response.body else 0)
+            ctx.set('response.size',
+                    len(response.body) if response.body else 0)
 
             ctx.done()
 
@@ -175,12 +177,12 @@ class AsyncHTTPClient(tornado.simple_httpclient.SimpleAsyncHTTPClient):
 
             def fetch_complete(future):
                 # This error handling is just copied from tornado.httpclient as
-                # we need to record a real HTTPError. httpclient might do the same thing
-                # again if needs to deal with the caller's callbacks.
+                # we need to record a real HTTPError. httpclient might do the
+                # same thing again if needs to deal with the caller's callbacks
                 exc = future.exception()
-                if isinstance(
-                    exc,
-                    tornado.httpclient.HTTPError) and exc.response is not None:
+                if (
+                        isinstance(exc, tornado.httpclient.HTTPError) and
+                        exc.response is not None):
                     response = exc.response
                 elif exc is not None:
                     response = tornado.httpclient.HTTPResponse(

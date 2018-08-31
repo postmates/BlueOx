@@ -226,7 +226,8 @@ def list_log_files(log_path):
 
 
 def filter_log_files_for_active(log_files):
-    """Filter our list of log files to remove those we expect might be active."""
+    """Filter our list of log files to remove those we expect might be active.
+    """
     out_log_files = []
 
     files_by_type = collections.defaultdict(list)
@@ -242,11 +243,11 @@ def filter_log_files_for_active(log_files):
 
         out_log_files += type_files
 
-        # If that last log file is old, then it's probably not being used either.
-        # We add a buffer of an hour just to make sure everything has rotated
-        # away safely when this is run close to midnight.
-        cutoff_date = (datetime.datetime.utcnow() - datetime.timedelta(hours=1)
-                      ).date()
+        # If that last log file is old, then it's probably not being used
+        # either. We add a buffer of an hour just to make sure everything has
+        # rotated away safely when this is run close to midnight.
+        cutoff_date = (
+            datetime.datetime.utcnow() - datetime.timedelta(hours=1)).date()
         if last_lf.date < cutoff_date:
             out_log_files.append(last_lf)
 

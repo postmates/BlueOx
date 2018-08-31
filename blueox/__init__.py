@@ -18,7 +18,6 @@ __description__ = 'A library for python-based application logging and data colle
 __url__ = 'https://github.com/rhettg/BlueOx'
 
 import logging
-import os
 
 from . import utils
 from . import ports
@@ -33,13 +32,13 @@ from .recorders import kafka, zmq
 
 log = logging.getLogger(__name__)
 
-RECORDER_ZMQ = 'zmq'
-RECORDER_KAFKA = 'kafka'
+ZMQ_RECORDER = 'zmq'
+KAFKA_RECORDER = 'kafka'
 RECORDERS = {
-    RECORDER_ZMQ: zmq,
-    RECORDER_KAFKA: kafka,
+    ZMQ_RECORDER: zmq,
+    KAFKA_RECORDER: kafka,
 }
-DEFAULT_RECORDER = RECORDER_ZMQ
+DEFAULT_RECORDER = ZMQ_RECORDER
 
 
 def configure(host, port, recorder=None):
