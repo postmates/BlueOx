@@ -86,12 +86,12 @@ class DefaultKafkaHost(TestCase):
 
     def test_emtpy(self):
         host = ports.default_kafka_host()
-        assert_equal(host, '127.0.0.1:9092')
+        assert_equal(host, '127.0.0.1:9002')
 
     def test_env(self):
         os.environ['BLUEOX_KAFKA_HOST'] = 'local.svc.team-me.aws.jk8s'
         host = ports.default_kafka_host()
-        assert_equal(host, 'local.svc.team-me.aws.jk8s:9092')
+        assert_equal(host, 'local.svc.team-me.aws.jk8s:9002')
 
     def test_env_port(self):
         os.environ['BLUEOX_KAFKA_HOST'] = 'local.svc.team-me.aws.jk8s:9002'

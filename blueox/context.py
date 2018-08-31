@@ -19,7 +19,6 @@ import functools
 import logging
 
 from . import utils
-from . import network
 
 log = logging.getLogger(__name__)
 
@@ -41,8 +40,10 @@ class Context(object):
             heirarchy of parent requests. Examples:
 
             '.foo' - Will generate a name like '<parent name>.foo'
-            '.foo.bar' - If the parent ends in '.foo', the final name will be '<parent name>.bar'
-            '^.foo' - Will use the top-most context, generating '<top parent name>.foo'
+            '.foo.bar' - If the parent ends in '.foo', the final name
+                         will be '<parent name>.bar'
+            '^.foo' - Will use the top-most context, generating
+                      '<top parent name>.foo'
             'top.foo.bar' - The name will be based on the longest matched
                 parent context. If there is a parent context named 'top' and a
                 parent context named 'top.foo', the new context will be named
@@ -111,11 +112,13 @@ class Context(object):
         elif parent_ctx:
             self.id = parent_ctx.id
         else:
-            # Generate an id if one wasn't provided and we don't have any parents
-            # We're going to encode the time as the front 4 bytes so we have some order to the ids
-            # that could prove useful later on by making sorting a little easier.
-            self.id = (struct.pack(">L", int(time.time())) + os.urandom(12)).encode(
-                'hex')
+            # Generate an id if one wasn't provided and we don't have any
+            # parents. We're going to encode the time as the front 4 bytes
+            # so we have some order to the ids that could prove useful
+            # later on by making sorting a little easier.
+            self.id = (
+                struct.pack(">L", int(time.time()))
+                + os.urandom(12)).encode('hex')
 
         if parent_ctx and not parent_ctx.enabled:
             self.enabled = False

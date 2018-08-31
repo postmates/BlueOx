@@ -28,7 +28,7 @@ def _default_host(host, default_host, default_port):
     if not host:
         host = default_host
     if ':' not in host:
-        host = "{}:{}".format(host, default_port)
+        host = '{}:{}'.format(host, default_port)
 
     return host
 
@@ -45,7 +45,7 @@ def default_collect_host(host=None):
 
 # For consistency, we'll abstract kafka connections in the same way
 ENV_VAR_KAFKA_HOST = 'BLUEOX_KAFKA_HOST'
-DEFAULT_KAFKA_PORT = 9092
+DEFAULT_KAFKA_PORT = 9002
 
 
 def default_kafka_host(host=None):
