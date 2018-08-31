@@ -23,7 +23,12 @@ class BlueOxMiddleware(object):
     def __init__(self, app):
         self.app = app
 
-        if 'BLUEOX_HOST' in app.config:
+        if 'BLUEOX_KAFKA_HOST' in app.config:
+            self.blueox_kafka_host = app.config['BLUEOX_KAFKA_HOST']
+            if self.blueox_kafka_host:
+                rec = blueox.KAFKA_RECORDER
+                blueox.default_configure(self.blueox_kafka_host, recorder=rec)
+        elif 'BLUEOX_HOST' in app.config:
             self.blueox_host = app.config['BLUEOX_HOST']
             if self.blueox_host:
                 blueox.default_configure(self.blueox_host)
@@ -45,8 +50,8 @@ class BlueOxMiddleware(object):
         headers = {}
         for k, v in request.environ.iteritems():
             if (
-                k.startswith('HTTP_') or k in
-                ('CONTENT_LENGTH', 'CONTENT_TYPE')):
+                    k.startswith('HTTP_') or
+                    k in ('CONTENT_LENGTH', 'CONTENT_TYPE')):
                 headers[k] = v
 
         blueox.set('headers', headers)
