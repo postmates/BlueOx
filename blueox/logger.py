@@ -3,7 +3,9 @@
 blueox.logger
 ~~~~~~~~
 
-This module provides integration with blueox and standard python logging module.
+This module provides integration with blueox and standard
+python logging module.
+
 :copyright: (c) 2012 by Rhett Garber
 :license: ISC, see LICENSE for more details.
 
@@ -20,7 +22,8 @@ class LogHandler(logging.Handler):
     Records standard fields such as logger name, level the message and if an
     exception was provided, the string formatted exception.
 
-    The type name, if not specified will be something like '<my parent context>.log'
+    The type name, if not specified will be something like
+    '<my parent context>.log'
     """
 
     def __init__(self, type_name=None):
