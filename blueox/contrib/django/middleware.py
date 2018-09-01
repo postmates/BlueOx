@@ -9,11 +9,11 @@ from django.conf import settings
 class Middleware(object):
 
     def __init__(self):
-        if hasattr(settings, 'BLUEOX_KAFKA_HOST'):
-            if settings.BLUEOX_KAFKA_HOST:
-                rec = blueox.KAFKA_RECORDER
+        if hasattr(settings, 'BLUEOX_PYCERNAN_HOST'):
+            if settings.BLUEOX_PYCERNAN_HOST:
+                rec = blueox.PYCERNAN_RECORDER
                 blueox.default_configure(
-                    settings.BLUEOX_KAFKA_HOST, recorder=rec)
+                    settings.BLUEOX_PYCERNAN_HOST, recorder=rec)
             else:
                 blueox.configure(None, None)
         elif hasattr(settings, 'BLUEOX_HOST'):

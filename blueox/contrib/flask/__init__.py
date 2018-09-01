@@ -23,11 +23,12 @@ class BlueOxMiddleware(object):
     def __init__(self, app):
         self.app = app
 
-        if 'BLUEOX_KAFKA_HOST' in app.config:
-            self.blueox_kafka_host = app.config['BLUEOX_KAFKA_HOST']
-            if self.blueox_kafka_host:
-                rec = blueox.KAFKA_RECORDER
-                blueox.default_configure(self.blueox_kafka_host, recorder=rec)
+        if 'BLUEOX_PYCERNAN_HOST' in app.config:
+            self.blueox_pycernan_host = app.config['BLUEOX_PYCERNAN_HOST']
+            if self.blueox_pycernan_host:
+                rec = blueox.PYCERNAN_RECORDER
+                blueox.default_configure(
+                    self.blueox_pycernan_host, recorder=rec)
         elif 'BLUEOX_HOST' in app.config:
             self.blueox_host = app.config['BLUEOX_HOST']
             if self.blueox_host:

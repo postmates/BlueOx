@@ -48,7 +48,7 @@ def check_meta_version(meta):
 
 
 def default_host(host=None):
-    """Build a default host string for the kafka producer
+    """Build a default host string for the blueox collector
     """
     return ports.default_collect_host(host)
 
