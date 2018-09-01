@@ -4,4 +4,4 @@ pyflakes
 tornado==3.2 
 boto 
 yapf
-kafka-python
+./vendor/pycernan-0.0.10.zip

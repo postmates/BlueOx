@@ -28,15 +28,15 @@ from . import context as _context_mod
 from .errors import Error
 from .logger import LogHandler
 from .timer import timeit
-from .recorders import kafka, zmq
+from .recorders import pycernan, zmq
 
 log = logging.getLogger(__name__)
 
 ZMQ_RECORDER = 'zmq'
-KAFKA_RECORDER = 'kafka'
+PYCERNAN_RECORDER = 'pycernan'
 RECORDERS = {
     ZMQ_RECORDER: zmq,
-    KAFKA_RECORDER: kafka,
+    PYCERNAN_RECORDER: pycernan,
 }
 DEFAULT_RECORDER = ZMQ_RECORDER
 
@@ -87,4 +87,4 @@ def default_configure(host=None, recorder=DEFAULT_RECORDER):
 
 def shutdown():
     zmq.close()
-    kafka.close()
+    pycernan.close()

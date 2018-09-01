@@ -42,10 +42,11 @@ else:
 
 @signals.worker_process_init.connect
 def on_worker_process_init(**kwargs):
-    if hasattr(settings, 'BLUEOX_KAFKA_HOST'):
-        if settings.BLUEOX_KAFKA_HOST:
-            rec = blueox.KAFKA_RECORDER
-            blueox.default_configure(settings.BLUEOX_KAFKA_HOST, recorder=rec)
+    if hasattr(settings, 'BLUEOX_PYCERNAN_HOST'):
+        if settings.BLUEOX_PYCERNAN_HOST:
+            rec = blueox.PYCERNAN_RECORDER
+            blueox.default_configure(
+                settings.BLUEOX_PYCERNAN_HOST, recorder=rec)
         else:
             blueox.configure(None, None)
     elif hasattr(settings, 'BLUEOX_HOST'):
