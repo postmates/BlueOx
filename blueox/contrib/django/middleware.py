@@ -1,6 +1,5 @@
 import sys
 import traceback
-import logging
 
 import blueox
 
@@ -10,7 +9,14 @@ from django.conf import settings
 class Middleware(object):
 
     def __init__(self):
-        if hasattr(settings, 'BLUEOX_HOST'):
+        if hasattr(settings, 'BLUEOX_PYCERNAN_HOST'):
+            if settings.BLUEOX_PYCERNAN_HOST:
+                rec = blueox.PYCERNAN_RECORDER
+                blueox.default_configure(
+                    settings.BLUEOX_PYCERNAN_HOST, recorder=rec)
+            else:
+                blueox.configure(None, None)
+        elif hasattr(settings, 'BLUEOX_HOST'):
             if settings.BLUEOX_HOST:
                 blueox.default_configure(settings.BLUEOX_HOST)
             else:
@@ -28,7 +34,9 @@ class Middleware(object):
 
         headers = {}
         for k, v in request.META.iteritems():
-            if k.startswith('HTTP_') or k in ('CONTENT_LENGTH', 'CONTENT_TYPE'):
+            if (
+                    k.startswith('HTTP_') or
+                    k in ('CONTENT_LENGTH', 'CONTENT_TYPE')):
                 headers[k] = v
         blueox.set('headers', headers)
 

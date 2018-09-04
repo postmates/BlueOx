@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-blueox.network
+blueox.recorders.zmq
 ~~~~~~~~
 
 This module provides our interface into ZeroMQ
@@ -9,6 +9,8 @@ This module provides our interface into ZeroMQ
 :license: ISC, see LICENSE for more details.
 
 """
+from __future__ import absolute_import
+
 import atexit
 import logging
 import msgpack
@@ -16,7 +18,8 @@ import struct
 import threading
 import zmq
 
-from . import utils
+from blueox import ports
+from blueox import utils
 
 log = logging.getLogger(__name__)
 
@@ -42,6 +45,12 @@ def check_meta_version(meta):
     value, = struct.unpack(">B", meta[0])
     if value != META_STRUCT_VERSION:
         raise ValueError(value)
+
+
+def default_host(host=None):
+    """Build a default host string for the blueox collector
+    """
+    return ports.default_collect_host(host)
 
 
 threadLocal = threading.local()

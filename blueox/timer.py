@@ -3,7 +3,9 @@
 blueox.timer
 ~~~~~~~~
 
-This module has a timer context manager for easily tracking wall-clock time for some execution
+This module has a timer context manager for easily tracking wall-clock
+time for some execution
+
 :copyright: (c) 2012 by Rhett Garber
 :license: ISC, see LICENSE for more details.
 

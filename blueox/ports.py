@@ -28,7 +28,7 @@ def _default_host(host, default_host, default_port):
     if not host:
         host = default_host
     if ':' not in host:
-        host = "{}:{}".format(host, default_port)
+        host = '{}:{}'.format(host, default_port)
 
     return host
 
@@ -41,3 +41,13 @@ def default_control_host(host=None):
 def default_collect_host(host=None):
     default_host = os.environ.get(ENV_VAR_COLLECT_HOST, DEFAULT_HOST)
     return _default_host(host, default_host, DEFAULT_COLLECT_PORT)
+
+
+# For consistency, we'll abstract pycernan connections in the same way
+ENV_VAR_PYCERNAN_HOST = 'BLUEOX_PYCERNAN_HOST'
+DEFAULT_PYCERNAN_PORT = 2003
+
+
+def default_pycernan_host(host=None):
+    default_host = os.environ.get(ENV_VAR_PYCERNAN_HOST, DEFAULT_HOST)
+    return _default_host(host, default_host, DEFAULT_PYCERNAN_PORT)
